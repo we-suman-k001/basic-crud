@@ -1,0 +1,28 @@
+{
+    "name": "vaahcms/basic",
+    "description": "description",
+    "version": "0.0.1",
+    "authors": [
+        {
+            "name": "suman",
+            "email": "support@vaah.dev"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "VaahCms\\Modules\\Basic\\Providers\\BasicServiceProvider"
+            ],
+            "aliases": {
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "VaahCms\\Modules\\Basic\\": ""
+        }
+    }
+}
