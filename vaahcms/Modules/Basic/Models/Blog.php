@@ -72,7 +72,7 @@ class Blog extends Model {
     }
     //-------------------------------------------------
 
-    public function createdByUser()
+    public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class,
             'created_by', 'id'
@@ -254,12 +254,11 @@ class Blog extends Model {
         {
             $rows = $request->rows;
         }
-
+        $list = $list->with(['createdByUser']);
         $list = $list->paginate($rows);
 
         $response['success'] = true;
         $response['data'] = $list;
-
         return $response;
 
 
