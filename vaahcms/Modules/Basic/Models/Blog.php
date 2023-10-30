@@ -80,6 +80,11 @@ class Blog extends Model {
     }
 
     //-------------------------------------------------
+    public function getContentAttribute($value): string
+    {
+        return ucfirst($value);
+    }
+    //-------------------------------------------------
     public static function getEmptyItem()
     {
         $model = new self();

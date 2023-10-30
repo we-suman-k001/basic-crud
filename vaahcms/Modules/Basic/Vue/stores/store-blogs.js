@@ -65,7 +65,9 @@ export const useBlogsStore = defineStore({
         list_create_menu: [],
         item_menu_list: [],
         item_menu_state: null,
-        form_menu_list: []
+        form_menu_list: [],
+        content_dialog_visibility:false,
+        content:null
     }),
     getters: {
 
@@ -578,6 +580,11 @@ export const useBlogsStore = defineStore({
                 this.query.filter[key] = null;
             }
             await this.updateUrlQueryString(this.query);
+        },
+        //--------------------------------------------------------------------
+        toContent(data){
+            this.content_dialog_visibility = true;
+            this.content = data;
         },
         //---------------------------------------------------------------------
         closeForm()
