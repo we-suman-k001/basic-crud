@@ -20,7 +20,7 @@ class VhBlogs extends Migration
 
             $table->string('title')->nullable()->index();
             $table->string('slug')->nullable()->index();
-            $table->string('content')->nullable()->index();
+            $table->text('content')->nullable()->index();
             //----common fields
             $table->text('meta')->nullable();
             $table->bigInteger('created_by')->nullable()->index();

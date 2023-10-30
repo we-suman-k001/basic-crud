@@ -26,9 +26,8 @@ const useVaah = vaah();
             <Column field="id" header="ID" :style="{width: store.getIdWidth()}" :sortable="true">
             </Column>
 
-            <Column field="title" header="title"
+            <Column field="title" header="Title"
                     :sortable="true">
-
                 <template #body="prop">
                     <Badge v-if="prop.data.deleted_at"
                            value="Trashed"
@@ -37,7 +36,11 @@ const useVaah = vaah();
                 </template>
 
             </Column>
-
+            <Column header="Author">
+                <template #body="{data}">
+                    {{data.created_by_user.first_name}}
+                </template>
+            </Column>
 
             <Column field="updated_at" header="Updated"
                     v-if="store.isViewLarge()"
