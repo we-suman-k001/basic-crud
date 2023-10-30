@@ -1,0 +1,10 @@
+/.git/
+/.idea/
+node_modules
+/vendor
+/package-lock.json
+/composer.lock
+/jsconfig.json
+/env.basic
+
+
