@@ -12,9 +12,10 @@ use WebReinvent\VaahCms\Entities\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 
-class Blog extends Model {
+class Blog extends Model
+{
 
-	  use SoftDeletes;
+    use SoftDeletes;
     use CrudWithUuidObservantTrait;
 
     //-------------------------------------------------
@@ -41,8 +42,9 @@ class Blog extends Model {
 
     ];
     //-------------------------------------------------
-    protected $appends  = [
+    protected $appends = [
     ];
+
     //-------------------------------------------------
     protected function serializeDate(DateTimeInterface $date)
     {
@@ -60,6 +62,7 @@ class Blog extends Model {
             'deleted_by',
         ];
     }
+
     //-------------------------------------------------
     public static function getFillableColumns()
     {
@@ -71,6 +74,7 @@ class Blog extends Model {
         );
         return $fillable_columns;
     }
+
     //-------------------------------------------------
 
     public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -85,14 +89,14 @@ class Blog extends Model {
     {
         return ucfirst($value);
     }
+
     //-------------------------------------------------
     public static function getEmptyItem()
     {
         $model = new self();
         $fillable = $model->getFillable();
         $empty_item = [];
-        foreach ($fillable as $column)
-        {
+        foreach ($fillable as $column) {
             $empty_item[$column] = null;
         }
 
@@ -114,38 +118,39 @@ class Blog extends Model {
             'deleted_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
     }
+
     //-------------------------------------------------
     public function getTableColumns()
-        {
-            return $this->getConnection()
-                ->getSchemaBuilder()
-                ->getColumnListing($this->getTable());
+    {
+        return $this->getConnection()
+            ->getSchemaBuilder()
+            ->getColumnListing($this->getTable());
+    }
+
+    //-------------------------------------------------
+    public function scopeExclude($query, $columns)
+    {
+        return $query->select(array_diff($this->getTableColumns(), $columns));
+    }
+
+    //-------------------------------------------------
+    public function scopeBetweenDates($query, $from, $to)
+    {
+
+        if ($from) {
+            $from = \Carbon::parse($from)
+                ->startOfDay()
+                ->toDateTimeString();
         }
 
-        //-------------------------------------------------
-        public function scopeExclude($query, $columns)
-        {
-            return $query->select(array_diff($this->getTableColumns(), $columns));
+        if ($to) {
+            $to = \Carbon::parse($to)
+                ->endOfDay()
+                ->toDateTimeString();
         }
 
-        //-------------------------------------------------
-        public function scopeBetweenDates($query, $from, $to)
-        {
-
-            if ($from) {
-                $from = \Carbon::parse($from)
-                    ->startOfDay()
-                    ->toDateTimeString();
-            }
-
-            if ($to) {
-                $to = \Carbon::parse($to)
-                    ->endOfDay()
-                    ->toDateTimeString();
-            }
-
-            $query->whereBetween('updated_at', [$from, $to]);
-        }
+        $query->whereBetween('updated_at', [$from, $to]);
+    }
 
     //-------------------------------------------------
     public static function createItem($request)
@@ -190,8 +195,7 @@ class Blog extends Model {
     public function scopeGetSorted($query, $filter)
     {
 
-        if(!isset($filter['sort']))
-        {
+        if (!isset($filter['sort'])) {
             return $query->orderBy('id', 'desc');
         }
 
@@ -200,8 +204,7 @@ class Blog extends Model {
 
         $direction = Str::contains($sort, ':');
 
-        if(!$direction)
-        {
+        if (!$direction) {
             return $query->orderBy($sort, 'asc');
         }
 
@@ -209,30 +212,29 @@ class Blog extends Model {
 
         return $query->orderBy($sort[0], $sort[1]);
     }
+
     //-------------------------------------------------
     public function scopeTrashedFilter($query, $filter)
     {
 
-        if(!isset($filter['trashed']))
-        {
+        if (!isset($filter['trashed'])) {
             return $query;
         }
         $trashed = $filter['trashed'];
 
-        if($trashed === 'include')
-        {
+        if ($trashed === 'include') {
             return $query->withTrashed();
-        } else if($trashed === 'only'){
+        } else if ($trashed === 'only') {
             return $query->onlyTrashed();
         }
 
     }
+
     //-------------------------------------------------
     public function scopeSearchFilter($query, $filter)
     {
 
-        if(!isset($filter['q']))
-        {
+        if (!isset($filter['q'])) {
             return $query;
         }
         $search = $filter['q'];
@@ -242,6 +244,7 @@ class Blog extends Model {
         });
 
     }
+
     //-------------------------------------------------
     public static function getList($request)
     {
@@ -251,8 +254,7 @@ class Blog extends Model {
 
         $rows = config('vaahcms.per_page');
 
-        if($request->has('rows'))
-        {
+        if ($request->has('rows')) {
             $rows = $request->rows;
         }
         $list = $list->with(['createdByUser']);
@@ -287,16 +289,21 @@ class Blog extends Model {
             return $response;
         }
 
-        if(isset($inputs['items']))
-        {
+        if (isset($inputs['items'])) {
             $items_id = collect($inputs['items'])
                 ->pluck('id')
                 ->toArray();
         }
-
-
         $items = self::whereIn('id', $items_id)
-            ->withTrashed();
+            ->withTrashed()->get();
+
+        foreach ($items as $item) {
+            if ($item->created_by !== Auth::id()) {
+                $response['success'] = false;
+                $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                return $response;
+            }
+        }
 
         switch ($inputs['type']) {
             case 'trash':
@@ -308,7 +315,7 @@ class Blog extends Model {
         }
 
         $response['success'] = true;
-        $response['data'] = true;
+        $response['data'] = $items;
         $response['messages'][] = 'Action was successful.';
 
         return $response;
@@ -339,6 +346,16 @@ class Blog extends Model {
         }
 
         $items_id = collect($inputs['items'])->pluck('id')->toArray();
+        $items = self::whereIn('id', $items_id)->get();
+
+        // Checking permission for each item
+        foreach ($items as $item) {
+            if ($item->created_by !== Auth::id()) {
+                $response['success'] = false;
+                $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                return $response;
+            }
+        }
         self::whereIn('id', $items_id)->forceDelete();
 
         $response['success'] = true;
@@ -347,42 +364,56 @@ class Blog extends Model {
 
         return $response;
     }
+
     //-------------------------------------------------
     public static function listAction($request, $type): array
     {
         $inputs = $request->all();
 
-        if(isset($inputs['items']))
-        {
+        if (isset($inputs['items'])) {
             $items_id = collect($inputs['items'])
                 ->pluck('id')
                 ->toArray();
 
             $items = self::whereIn('id', $items_id)
-                ->withTrashed();
+                ->withTrashed()->get();
+            foreach ($items as $item) {
+                if ($item->created_by !== Auth::id()) {
+                    $response['success'] = false;
+                    $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                    return $response;
+                }
+            }
         }
+
 
         $list = self::query();
 
-        if($request->has('filter')){
+        if ($request->has('filter')) {
             $list->getSorted($request->filter);
             $list->trashedFilter($request->filter);
             $list->searchFilter($request->filter);
         }
-
+        foreach ($list->get() as $item) {
+            if ($item->created_by !== Auth::id()) {
+                $response['success'] = false;
+                $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                return $response;
+            }
+        }
         switch ($type) {
             case 'trash':
-                if(isset($items_id) && count($items_id) > 0) {
+                if (isset($items_id) && count($items_id) > 0) {
                     self::whereIn('id', $items_id)->delete();
                 }
                 break;
             case 'restore':
-                if(isset($items_id) && count($items_id) > 0) {
+                if (isset($items_id) && count($items_id) > 0) {
                     self::whereIn('id', $items_id)->restore();
                 }
                 break;
             case 'delete':
-                if(isset($items_id) && count($items_id) > 0) {
+                if (isset($items_id) && count($items_id) > 0) {
                     self::whereIn('id', $items_id)->forceDelete();
                 }
                 break;
@@ -400,7 +431,7 @@ class Blog extends Model {
             case 'create-5000-records':
             case 'create-10000-records':
 
-                if(!config('basic.is_dev')){
+                if (!config('basic.is_dev')) {
                     $response['success'] = false;
                     $response['errors'][] = 'User is not in the development environment.';
 
@@ -409,7 +440,7 @@ class Blog extends Model {
 
                 preg_match('/-(.*?)-/', $type, $matches);
 
-                if(count($matches) !== 2){
+                if (count($matches) !== 2) {
                     break;
                 }
 
@@ -423,6 +454,7 @@ class Blog extends Model {
 
         return $response;
     }
+
     //-------------------------------------------------
     public static function getItem($id)
     {
@@ -431,13 +463,12 @@ class Blog extends Model {
             ->withTrashed()
             ->first();
 
-        if(!$item)
-        {
+        if (!$item) {
             $response['success'] = false;
-            $response['errors'][] = 'Record not found with ID: '.$id;
+            $response['errors'][] = 'Record not found with ID: ' . $id;
             return $response;
         }
-        if($item->created_by != Auth::id()){
+        if ($item->created_by != Auth::id()) {
             $response['success'] = false;
             $response['errors'][] = trans("vaahcms::messages.permission_denied");
             return $response;
@@ -447,6 +478,7 @@ class Blog extends Model {
         return $response;
 
     }
+
     //-------------------------------------------------
     public static function updateItem($request, $id)
     {
@@ -479,6 +511,7 @@ class Blog extends Model {
             return $response;
         }
 
+
         $item = self::where('id', $id)->withTrashed()->first();
         $item->fill($inputs);
         $item->slug = Str::slug($inputs['slug']);
@@ -489,6 +522,7 @@ class Blog extends Model {
         return $response;
 
     }
+
     //-------------------------------------------------
     public static function deleteItem($request, $id): array
     {
@@ -506,11 +540,11 @@ class Blog extends Model {
 
         return $response;
     }
+
     //-------------------------------------------------
     public static function itemAction($request, $id, $type): array
     {
-        switch($type)
-        {
+        switch ($type) {
             case 'trash':
                 self::where('id', $id)
                     ->withTrashed()
@@ -525,6 +559,7 @@ class Blog extends Model {
 
         return self::getItem($id);
     }
+
     //-------------------------------------------------
 
     public static function validation($inputs)
@@ -549,16 +584,15 @@ class Blog extends Model {
     }
 
     //-------------------------------------------------
-    public static function seedSampleItems($records=100)
+    public static function seedSampleItems($records = 100)
     {
 
         $i = 0;
 
-        while($i < $records)
-        {
+        while ($i < $records) {
             $inputs = self::fillItem(false);
 
-            $item =  new self();
+            $item = new self();
             $item->fill($inputs);
             $item->save();
             $i++;
@@ -576,7 +610,7 @@ class Blog extends Model {
             'except' => self::getUnFillableColumns()
         ]);
         $fillable = VaahSeeder::fill($request);
-        if(!$fillable['success']){
+        if (!$fillable['success']) {
             return $fillable;
         }
         $inputs = $fillable['data']['fill'];
@@ -588,7 +622,7 @@ class Blog extends Model {
          * You should also return relationship from here
          */
 
-        if(!$is_response_return){
+        if (!$is_response_return) {
             return $inputs;
         }
 
