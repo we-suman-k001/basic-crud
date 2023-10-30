@@ -2,13 +2,13 @@
 import {onMounted, reactive, ref} from "vue";
 import {useRoute} from 'vue-router';
 
-import {useArticleStore} from '../../stores/store-articles'
+import {useBlogsStore} from "../../stores/store-blogs";
 import {useRootStore} from '../../stores/root'
 
 import Actions from "./components/Actions.vue";
 import Table from "./components/Table.vue";
 
-const store = useArticleStore();
+const store = useBlogsStore();
 const root = useRootStore();
 const route = useRoute();
 
@@ -17,7 +17,7 @@ const confirm = useConfirm();
 
 
 onMounted(async () => {
-    document.title = 'Articles - Basic';
+    document.title = 'Blogs - Basic';
     /**
      * call onLoad action when List view loads
      */
@@ -71,7 +71,7 @@ const toggleCreateMenu = (event) => {
 
                     <div class="flex flex-row">
                         <div >
-                            <b class="mr-1">Articles</b>
+                            <b class="mr-1">Blogs</b>
                             <Badge v-if="store.list && store.list.total > 0"
                                    :value="store.list.total">
                             </Badge>
@@ -85,14 +85,14 @@ const toggleCreateMenu = (event) => {
 
                     <div class="p-inputgroup">
 
-                    <Button data-testid="articles-list-create"
+                    <Button data-testid="blogs-list-create"
                             class="p-button-sm"
                             @click="store.toForm()">
                         <i class="pi pi-plus mr-1"></i>
                         Create
                     </Button>
 
-                    <Button data-testid="articles-list-reload"
+                    <Button data-testid="blogs-list-reload"
                             class="p-button-sm"
                             @click="store.getList()">
                         <i class="pi pi-refresh mr-1"></i>
@@ -105,7 +105,7 @@ const toggleCreateMenu = (event) => {
                         type="button"
                         @click="toggleCreateMenu"
                         class="p-button-sm"
-                        data-testid="articles-create-menu"
+                        data-testid="blogs-create-menu"
                         icon="pi pi-angle-down"
                         aria-haspopup="true"/>
 

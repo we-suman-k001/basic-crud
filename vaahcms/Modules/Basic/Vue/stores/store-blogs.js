@@ -582,32 +582,32 @@ export const useBlogsStore = defineStore({
         //---------------------------------------------------------------------
         closeForm()
         {
-            this.$router.push({name: 'articles.index'})
+            this.$router.push({name: 'blogs.index'})
         },
         //---------------------------------------------------------------------
         toList()
         {
             this.item = vaah().clone(this.assets.empty_item);
-            this.$router.push({name: 'articles.index'})
+            this.$router.push({name: 'blogs.index'})
         },
         //---------------------------------------------------------------------
         toForm()
         {
             this.item = vaah().clone(this.assets.empty_item);
             this.getFormMenu();
-            this.$router.push({name: 'articles.form'})
+            this.$router.push({name: 'blogs.form'})
         },
         //---------------------------------------------------------------------
         toView(item)
         {
             this.item = vaah().clone(item);
-            this.$router.push({name: 'articles.view', params:{id:item.id}})
+            this.$router.push({name: 'blogs.view', params:{id:item.id}})
         },
         //---------------------------------------------------------------------
         toEdit(item)
         {
             this.item = item;
-            this.$router.push({name: 'articles.form', params:{id:item.id}})
+            this.$router.push({name: 'blogs.form', params:{id:item.id}})
         },
         //---------------------------------------------------------------------
         isViewLarge()
@@ -654,21 +654,6 @@ export const useBlogsStore = defineStore({
         {
             this.list_selected_menu = [
                 {
-                    label: 'Activate',
-                    command: async () => {
-                        await this.updateList('activate')
-                    }
-                },
-                {
-                    label: 'Deactivate',
-                    command: async () => {
-                        await this.updateList('deactivate')
-                    }
-                },
-                {
-                    separator: true
-                },
-                {
                     label: 'Trash',
                     icon: 'pi pi-times',
                     command: async () => {
@@ -696,21 +681,6 @@ export const useBlogsStore = defineStore({
         getListBulkMenu()
         {
             this.list_bulk_menu = [
-                {
-                    label: 'Mark all as active',
-                    command: async () => {
-                        await this.listAction('activate-all')
-                    }
-                },
-                {
-                    label: 'Mark all as inactive',
-                    command: async () => {
-                        await this.listAction('deactivate-all')
-                    }
-                },
-                {
-                    separator: true
-                },
                 {
                     label: 'Trash All',
                     icon: 'pi pi-times',
@@ -913,5 +883,5 @@ export const useBlogsStore = defineStore({
 
 // Pinia hot reload
 if (import.meta.hot) {
-    import.meta.hot.accept(acceptHMRUpdate(useArticleStore, import.meta.hot))
+    import.meta.hot.accept(acceptHMRUpdate(useBlogsStore, import.meta.hot))
 }

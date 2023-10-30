@@ -1,6 +1,7 @@
 <?php namespace VaahCms\Modules\Basic\Models;
 
 use Carbon\Carbon;
+use DateTimeInterface;
 use Faker\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,9 +27,9 @@ class Blog extends Model {
     //-------------------------------------------------
     protected $fillable = [
         'uuid',
-        'name',
+        'title',
         'slug',
-        'is_active',
+        'content',
         'created_by',
         'updated_by',
         'deleted_by',

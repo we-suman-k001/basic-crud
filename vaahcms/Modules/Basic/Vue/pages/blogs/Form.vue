@@ -1,17 +1,16 @@
 <script setup>
 import {onMounted, ref, watch} from "vue";
-import { useArticleStore } from '../../stores/store-articles'
+import {useBlogsStore} from "../../stores/store-blogs";
 
 import VhField from './../../vaahvue/vue-three/primeflex/VhField.vue'
 import {useRoute} from 'vue-router';
 
 
-const store = useArticleStore();
+const store = useBlogsStore();
 const route = useRoute();
 
 onMounted(async () => {
-    if(route.params && route.params.id)
-    {
+    if (route.params && route.params.id) {
         await store.getItem(route.params.id);
     }
 
@@ -28,7 +27,7 @@ const toggleFormMenu = (event) => {
 </script>
 <template>
 
-    <div class="col-6" >
+    <div class="col-6">
 
         <Panel class="is-small">
 
@@ -57,14 +56,14 @@ const toggleFormMenu = (event) => {
 
                     <Button class="p-button-sm"
                             v-if="store.item && store.item.id"
-                            data-testid="articles-view_item"
+                            data-testid="blogs-view_item"
                             @click="store.toView(store.item)"
                             icon="pi pi-eye"/>
 
                     <Button label="Save"
                             class="p-button-sm"
                             v-if="store.item && store.item.id"
-                            data-testid="articles-save"
+                            data-testid="blogs-save"
                             @click="store.itemAction('save')"
                             icon="pi pi-save"/>
 
@@ -72,7 +71,7 @@ const toggleFormMenu = (event) => {
                             v-else
                             @click="store.itemAction('create-and-new')"
                             class="p-button-sm"
-                            data-testid="articles-create-and-new"
+                            data-testid="blogs-create-and-new"
                             icon="pi pi-save"/>
 
 
@@ -81,23 +80,22 @@ const toggleFormMenu = (event) => {
                         type="button"
                         @click="toggleFormMenu"
                         class="p-button-sm"
-                        data-testid="articles-form-menu"
+                        data-testid="blogs-form-menu"
                         icon="pi pi-angle-down"
                         aria-haspopup="true"/>
 
                     <Menu ref="form_menu"
                           :model="store.form_menu_list"
-                          :popup="true" />
+                          :popup="true"/>
                     <!--/form_menu-->
 
 
                     <Button class="p-button-primary p-button-sm"
                             icon="pi pi-times"
-                            data-testid="articles-to-list"
+                            data-testid="blogs-to-list"
                             @click="store.toList()">
                     </Button>
                 </div>
-
 
 
             </template>
@@ -114,13 +112,13 @@ const toggleFormMenu = (event) => {
                     <div class="flex align-items-center justify-content-between">
 
                         <div class="">
-                            Deleted {{store.item.deleted_at}}
+                            Deleted {{ store.item.deleted_at }}
                         </div>
 
                         <div class="ml-3">
                             <Button label="Restore"
                                     class="p-button-sm"
-                                    data-testid="articles-item-restore"
+                                    data-testid="blogs-item-restore"
                                     @click="store.itemAction('restore')">
                             </Button>
                         </div>
@@ -130,29 +128,36 @@ const toggleFormMenu = (event) => {
                 </Message>
 
 
-                <VhField label="Name">
+                <VhField label="Title">
                     <InputText class="w-full"
-                               name="articles-name"
-                               data-testid="articles-name"
+                               name="blogs-title"
+                               data-testid="blogs-title"
+                               placeholder="Enter the title of the blog.."
+                               autocomplete="off"
                                @update:modelValue="store.watchItem"
-                               v-model="store.item.name"/>
+                               v-model="store.item.title"/>
                 </VhField>
 
                 <VhField label="Slug">
                     <InputText class="w-full"
-                               name="articles-slug"
-                               data-testid="articles-slug"
+                               name="blogs-slug"
+                               placeholder="Enter the slug of the blog.."
+                               autocomplete="off"
+                               data-testid="blogs-slug"
                                v-model="store.item.slug"/>
                 </VhField>
 
-                <VhField label="Is Active">
-                    <InputSwitch v-bind:false-value="0"
-                                 v-bind:true-value="1"
-                                 class="p-inputswitch-sm"
-                                 name="articles-active"
-                                 data-testid="articles-active"
-                                 v-model="store.item.is_active"/>
+                <VhField label="Content">
+                    <Textarea class="w-full"
+                              name="blogs-content"
+                              placeholder="Content here.."
+                              autocomplete="off"
+                              rows="5"
+                              autoResize
+                              data-testid="blogs-content"
+                              v-model="store.item.content"/>
                 </VhField>
+
 
             </div>
         </Panel>

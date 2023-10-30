@@ -1,10 +1,11 @@
 <script  setup>
 import {ref, reactive, watch, onMounted} from 'vue';
-import { useArticleStore } from '../../../stores/store-articles'
+import { useBlogsStore } from '../../../stores/store-blogs'
+
 
 import Filters from './Filters.vue'
 
-const store = useArticleStore();
+const store = useBlogsStore();
 
 onMounted(async () => {
     store.getListSelectedMenu();
@@ -39,7 +40,7 @@ const toggleBulkMenuState = (event) => {
                 <Button class="p-button-sm"
                     type="button"
                     @click="toggleSelectedMenuState"
-                    data-testid="articles-actions-menu"
+                    data-testid="blogs-actions-menu"
                     aria-haspopup="true"
                     aria-controls="overlay_menu">
                     <i class="pi pi-angle-down"></i>
@@ -55,7 +56,7 @@ const toggleBulkMenuState = (event) => {
                 <Button
                     type="button"
                     @click="toggleBulkMenuState"
-                    data-testid="articles-actions-bulk-menu"
+                    data-testid="blogs-actions-bulk-menu"
                     aria-haspopup="true"
                     aria-controls="bulk_menu_state"
                     class="ml-1 p-button-sm">
@@ -84,16 +85,16 @@ const toggleBulkMenuState = (event) => {
                                        class="p-inputtext-sm"
                                        @keyup.enter.native="store.delayedSearch()"
                                        @keyup.13="store.delayedSearch()"
-                                       data-testid="articles-actions-search"
+                                       data-testid="blogs-actions-search"
                                        placeholder="Search"/>
                             <Button @click="store.delayedSearch()"
                                     class="p-button-sm"
-                                    data-testid="articles-actions-search-button"
+                                    data-testid="blogs-actions-search-button"
                                     icon="pi pi-search"/>
                             <Button
                                 type="button"
                                 class="p-button-sm"
-                                data-testid="articles-actions-show-filters"
+                                data-testid="blogs-actions-show-filters"
                                 @click="store.show_filters = true">
                                 Filters
                                 <Badge v-if="store.count_filters > 0" :value="store.count_filters"></Badge>
@@ -102,7 +103,7 @@ const toggleBulkMenuState = (event) => {
                             <Button
                                 type="button"
                                 icon="pi pi-filter-slash"
-                                data-testid="articles-actions-reset-filters"
+                                data-testid="blogs-actions-reset-filters"
                                 class="p-button-sm"
                                 label="Reset"
                                 @click="store.resetQuery()" />

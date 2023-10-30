@@ -2,10 +2,10 @@
 import {onMounted, ref, watch} from "vue";
 import {useRoute} from 'vue-router';
 
-import { useArticleStore } from '../../stores/store-articles'
+import {useBlogsStore} from "../../stores/store-blogs";
 
 import VhViewRow from '../../vaahvue/vue-three/primeflex/VhViewRow.vue';
-const store = useArticleStore();
+const store = useBlogsStore();
 const route = useRoute();
 
 onMounted(async () => {
@@ -35,7 +35,7 @@ onMounted(async () => {
     /*watch(route, async (newVal,oldVal) =>
         {
             if(newVal.params && !newVal.params.id
-                && newVal.name === 'articles.view')
+                && newVal.name === 'blogs.view')
             {
                 store.toList();
 
@@ -80,7 +80,7 @@ const toggleItemMenu = (event) => {
                     <Button label="Edit"
                             class="p-button-sm"
                             @click="store.toEdit(store.item)"
-                            data-testid="articles-item-to-edit"
+                            data-testid="blogs-item-to-edit"
                             icon="pi pi-save"/>
 
                     <!--item_menu-->
@@ -88,7 +88,7 @@ const toggleItemMenu = (event) => {
                         type="button"
                         class="p-button-sm"
                         @click="toggleItemMenu"
-                        data-testid="articles-item-menu"
+                        data-testid="blogs-item-menu"
                         icon="pi pi-angle-down"
                         aria-haspopup="true"/>
 
@@ -99,7 +99,7 @@ const toggleItemMenu = (event) => {
 
                     <Button class="p-button-primary p-button-sm"
                             icon="pi pi-times"
-                            data-testid="articles-item-to-list"
+                            data-testid="blogs-item-to-list"
                             @click="store.toList()"/>
 
                 </div>
@@ -126,7 +126,7 @@ const toggleItemMenu = (event) => {
                         <div class="ml-3">
                             <Button label="Restore"
                                     class="p-button-sm"
-                                    data-testid="articles-item-restore"
+                                    data-testid="blogs-item-restore"
                                     @click="store.itemAction('restore')">
                             </Button>
                         </div>
@@ -154,13 +154,6 @@ const toggleItemMenu = (event) => {
                             <VhViewRow :label="column"
                                        :value="value"
                                        type="user"
-                            />
-                        </template>
-
-                        <template v-else-if="column === 'is_active'">
-                            <VhViewRow :label="column"
-                                       :value="value"
-                                       type="yes-no"
                             />
                         </template>
 
