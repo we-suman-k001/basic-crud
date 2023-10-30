@@ -6,6 +6,7 @@ use Faker\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use WebReinvent\VaahCms\Entities\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
@@ -260,8 +261,6 @@ class Blog extends Model {
         $response['success'] = true;
         $response['data'] = $list;
         return $response;
-
-
     }
 
     //-------------------------------------------------
@@ -427,7 +426,6 @@ class Blog extends Model {
     //-------------------------------------------------
     public static function getItem($id)
     {
-
         $item = self::where('id', $id)
             ->with(['createdByUser', 'updatedByUser', 'deletedByUser'])
             ->withTrashed()
@@ -439,9 +437,13 @@ class Blog extends Model {
             $response['errors'][] = 'Record not found with ID: '.$id;
             return $response;
         }
+        if($item->created_by != Auth::id()){
+            $response['success'] = false;
+            $response['errors'][] = trans("vaahcms::messages.permission_denied");
+            return $response;
+        }
         $response['success'] = true;
         $response['data'] = $item;
-
         return $response;
 
     }
