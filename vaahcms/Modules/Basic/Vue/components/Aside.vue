@@ -20,11 +20,6 @@ const items = ref([
                 to: "/"
             },
             {
-                label: 'Articles',
-                icon: 'fa-solid fa-book-bookmark',
-                to: "/articles"
-            },
-            {
                 label: 'Blogs',
                 icon: 'fa-solid fa-tarp-droplet',
                 to: "/blogs"
