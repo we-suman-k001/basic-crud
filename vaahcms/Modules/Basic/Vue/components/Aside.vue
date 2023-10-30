@@ -16,13 +16,18 @@ const items = ref([
         items: [
             {
                 label: 'Dashboard',
-                icon: 'fa-regular fa-chart-bar',
+                icon: 'fa-solid fa-users-line',
                 to: "/"
             },
             {
                 label: 'Articles',
-                icon: 'fa-regular fa-chart-bar',
+                icon: 'fa-solid fa-book-bookmark',
                 to: "/articles"
+            },
+            {
+                label: 'Blogs',
+                icon: 'fa-solid fa-tarp-droplet',
+                to: "/blogs"
             },
         ]
     },
