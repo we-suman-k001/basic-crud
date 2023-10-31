@@ -47,7 +47,6 @@ class Blog extends Model
 
     ];
     //-------------------------------------------------
-
     protected $appends = [
     ];
     //-------------------------------------------------
@@ -57,7 +56,7 @@ class Blog extends Model
         return $date->format($date_time_format);
     }
     //-------------------------------------------------
-    public static function getUnFillableColumns(): array
+    public function getContentAttribute($value): string
     {
         return ucfirst($value);
     }
@@ -82,17 +81,11 @@ class Blog extends Model
         );
     }
     //-------------------------------------------------
-
     public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'created_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
-    }
-    //-------------------------------------------------
-    public static function getEmptyItem(): array
-    {
-        return ucfirst($value);
     }
     //-------------------------------------------------
     public static function getEmptyItem(): array
@@ -261,12 +254,9 @@ class Blog extends Model
         $rules = array(
             'type' => 'required',
         );
-
         $messages = array(
             'type.required' => 'Action type is required',
         );
-
-
         $validator = \Validator::make($inputs, $rules, $messages);
         if ($validator->fails()) {
 
@@ -275,7 +265,6 @@ class Blog extends Model
             $response['errors'] = $errors;
             return $response;
         }
-
         if (isset($inputs['items'])) {
             $items_id = collect($inputs['items'])
                 ->pluck('id')
@@ -291,7 +280,6 @@ class Blog extends Model
                 return $response;
             }
         }
-
         switch ($inputs['type']) {
             case 'trash':
                 self::whereIn('id', $items_id)->delete();
@@ -300,18 +288,15 @@ class Blog extends Model
                 self::whereIn('id', $items_id)->restore();
                 break;
         }
-
         $response['success'] = true;
         $response['data'] = $items;
         $response['messages'][] = 'Action was successful.';
-
         return $response;
     }
     //-------------------------------------------------
     public static function deleteList($request): array
     {
         $inputs = $request->all();
-
         $rules = array(
             'type' => 'required',
             'items' => 'required',
@@ -506,7 +491,7 @@ class Blog extends Model
 
     }
     //-------------------------------------------------
-    public static function deleteItem($request, $id): array
+    public static function deleteItem($id): array
     {
         $item = self::where('id', $id)->withTrashed()->first();
         if (!$item) {
@@ -523,7 +508,7 @@ class Blog extends Model
         return $response;
     }
     //-------------------------------------------------
-    public static function itemAction($request, $id, $type): array
+    public static function itemAction($id, $type): array
     {
         switch ($type) {
             case 'trash':
@@ -592,16 +577,9 @@ class Blog extends Model
         $inputs = $fillable['data']['fill'];
 
         $faker = Factory::create();
-
-        /*
-         * You can override the filled variables below this line.
-         * You should also return relationship from here
-         */
-
         if (!$is_response_return) {
             return $inputs;
         }
-
         $response['success'] = true;
         $response['data']['fill'] = $inputs;
         return $response;
@@ -610,5 +588,4 @@ class Blog extends Model
     //-------------------------------------------------
     //-------------------------------------------------
     //-------------------------------------------------
-
 }
