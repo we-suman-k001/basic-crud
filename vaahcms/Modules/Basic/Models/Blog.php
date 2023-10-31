@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use WebReinvent\VaahCms\Entities\User;
 use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
+use function Laravel\Prompts\search;
 
 class Blog extends Model
 {
@@ -233,16 +234,17 @@ class Blog extends Model
     //-------------------------------------------------
     public function scopeSearchFilter($query, $filter)
     {
-
         if (!isset($filter['q'])) {
             return $query;
         }
         $search = $filter['q'];
         $query->where(function ($q) use ($search) {
             $q->where('title', 'LIKE', '%' . $search . '%')
-                ->orWhere('slug', 'LIKE', '%' . $search . '%');
+                ->orWhere('slug', 'LIKE', '%' . $search . '%')
+                ->orWhereHas('createdByUser', function ($userQuery) use ($search) {
+                    $userQuery->where('first_name', 'LIKE', '%' . $search . '%');
+                });
         });
-
     }
 
     //-------------------------------------------------
