@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Faker\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,10 @@ use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use function Laravel\Prompts\search;
 
+/**
+ * @method static where(string $string, mixed $title)
+ * @property mixed|string slug
+ */
 class Blog extends Model
 {
 
@@ -37,7 +42,6 @@ class Blog extends Model
         'updated_by',
         'deleted_by',
     ];
-
     //-------------------------------------------------
     protected $fill_except = [
 
@@ -45,16 +49,19 @@ class Blog extends Model
     //-------------------------------------------------
     protected $appends = [
     ];
-
     //-------------------------------------------------
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         $date_time_format = config('settings.global.datetime_format');
         return $date->format($date_time_format);
     }
-
     //-------------------------------------------------
-    public static function getUnFillableColumns()
+    public function getContentAttribute($value): string
+    {
+        return ucfirst($value);
+    }
+    //-------------------------------------------------
+    public static function getUnFillableColumns(): array
     {
         return [
             'uuid',
@@ -63,36 +70,25 @@ class Blog extends Model
             'deleted_by',
         ];
     }
-
     //-------------------------------------------------
-    public static function getFillableColumns()
+    public static function getFillableColumns(): array
     {
         $model = new self();
         $except = $model->fill_except;
         $fillable_columns = $model->getFillable();
-        $fillable_columns = array_diff(
+        return array_diff(
             $fillable_columns, $except
         );
-        return $fillable_columns;
     }
-
     //-------------------------------------------------
-
-    public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'created_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
     }
-
     //-------------------------------------------------
-    public function getContentAttribute($value): string
-    {
-        return ucfirst($value);
-    }
-
-    //-------------------------------------------------
-    public static function getEmptyItem()
+    public static function getEmptyItem(): array
     {
         $model = new self();
         $fillable = $model->getFillable();
@@ -100,40 +96,34 @@ class Blog extends Model
         foreach ($fillable as $column) {
             $empty_item[$column] = null;
         }
-
         return $empty_item;
     }
-
     //-------------------------------------------------
-    public function updatedByUser()
+    public function updatedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'updated_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
     }
-
     //-------------------------------------------------
-    public function deletedByUser()
+    public function deletedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'deleted_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
     }
-
     //-------------------------------------------------
-    public function getTableColumns()
+    public function getTableColumns(): array
     {
         return $this->getConnection()
             ->getSchemaBuilder()
             ->getColumnListing($this->getTable());
     }
-
     //-------------------------------------------------
     public function scopeExclude($query, $columns)
     {
         return $query->select(array_diff($this->getTableColumns(), $columns));
     }
-
     //-------------------------------------------------
     public function scopeBetweenDates($query, $from, $to)
     {
@@ -152,35 +142,28 @@ class Blog extends Model
 
         $query->whereBetween('updated_at', [$from, $to]);
     }
-
     //-------------------------------------------------
-    public static function createItem($request)
+    public static function createItem($request): array
     {
-
         $inputs = $request->all();
-
         $validation = self::validation($inputs);
         if (!$validation['success']) {
             return $validation;
         }
         // check if title exist
         $item = self::where('title', $inputs['title'])->withTrashed()->first();
-
         if ($item) {
             $response['success'] = false;
             $response['messages'][] = "This title is already exist.";
             return $response;
         }
-
         // check if slug exist
         $item = self::where('slug', $inputs['slug'])->withTrashed()->first();
-
         if ($item) {
             $response['success'] = false;
             $response['messages'][] = "This slug is already exist.";
             return $response;
         }
-
         $item = new self();
         $item->fill($inputs);
         $item->slug = Str::slug($inputs['slug']);
@@ -191,7 +174,6 @@ class Blog extends Model
         return $response;
 
     }
-
     //-------------------------------------------------
     public function scopeGetSorted($query, $filter)
     {
@@ -213,7 +195,6 @@ class Blog extends Model
 
         return $query->orderBy($sort[0], $sort[1]);
     }
-
     //-------------------------------------------------
     public function scopeTrashedFilter($query, $filter)
     {
@@ -230,7 +211,6 @@ class Blog extends Model
         }
 
     }
-
     //-------------------------------------------------
     public function scopeSearchFilter($query, $filter)
     {
@@ -246,9 +226,8 @@ class Blog extends Model
                 });
         });
     }
-
     //-------------------------------------------------
-    public static function getList($request)
+    public static function getList($request): array
     {
         $list = self::getSorted($request->filter);
         $list->trashedFilter($request->filter);
@@ -266,9 +245,8 @@ class Blog extends Model
         $response['data'] = $list;
         return $response;
     }
-
     //-------------------------------------------------
-    public static function updateList($request)
+    public static function updateList($request): array
     {
 
         $inputs = $request->all();
@@ -322,7 +300,6 @@ class Blog extends Model
 
         return $response;
     }
-
     //-------------------------------------------------
     public static function deleteList($request): array
     {
@@ -366,7 +343,6 @@ class Blog extends Model
 
         return $response;
     }
-
     //-------------------------------------------------
     public static function listAction($request, $type): array
     {
@@ -456,9 +432,8 @@ class Blog extends Model
 
         return $response;
     }
-
     //-------------------------------------------------
-    public static function getItem($id)
+    public static function getItem($id): array
     {
         $item = self::where('id', $id)
             ->with(['createdByUser', 'updatedByUser', 'deletedByUser'])
@@ -480,9 +455,8 @@ class Blog extends Model
         return $response;
 
     }
-
     //-------------------------------------------------
-    public static function updateItem($request, $id)
+    public static function updateItem($request, $id): array
     {
         $inputs = $request->all();
 
@@ -524,7 +498,6 @@ class Blog extends Model
         return $response;
 
     }
-
     //-------------------------------------------------
     public static function deleteItem($request, $id): array
     {
@@ -542,7 +515,6 @@ class Blog extends Model
 
         return $response;
     }
-
     //-------------------------------------------------
     public static function itemAction($request, $id, $type): array
     {
@@ -561,10 +533,8 @@ class Blog extends Model
 
         return self::getItem($id);
     }
-
     //-------------------------------------------------
-
-    public static function validation($inputs)
+    public static function validation($inputs): array
     {
 
         $rules = array(
@@ -584,7 +554,6 @@ class Blog extends Model
         return $response;
 
     }
-
     //-------------------------------------------------
     public static function seedSampleItems($records = 100)
     {
@@ -602,8 +571,6 @@ class Blog extends Model
         }
 
     }
-
-
     //-------------------------------------------------
     public static function fillItem($is_response_return = true)
     {
@@ -632,7 +599,6 @@ class Blog extends Model
         $response['data']['fill'] = $inputs;
         return $response;
     }
-
     //-------------------------------------------------
     //-------------------------------------------------
     //-------------------------------------------------
