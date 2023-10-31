@@ -47,7 +47,6 @@ class Blog extends Model
 
     ];
     //-------------------------------------------------
-
     protected $appends = [
     ];
     //-------------------------------------------------
@@ -57,7 +56,7 @@ class Blog extends Model
         return $date->format($date_time_format);
     }
     //-------------------------------------------------
-    public static function getUnFillableColumns(): array
+    public function getContentAttribute($value): string
     {
         return ucfirst($value);
     }
@@ -82,17 +81,11 @@ class Blog extends Model
         );
     }
     //-------------------------------------------------
-
     public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'created_by', 'id'
         )->select('id', 'uuid', 'first_name', 'last_name', 'email');
-    }
-    //-------------------------------------------------
-    public static function getEmptyItem(): array
-    {
-        return ucfirst($value);
     }
     //-------------------------------------------------
     public static function getEmptyItem(): array
