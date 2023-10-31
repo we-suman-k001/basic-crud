@@ -47,9 +47,6 @@ class Blog extends Model
 
     ];
     //-------------------------------------------------
-    protected $appends = [
-    ];
-    //-------------------------------------------------
     protected function serializeDate(DateTimeInterface $date): string
     {
         $date_time_format = config('settings.global.datetime_format');
@@ -57,6 +54,11 @@ class Blog extends Model
     }
     //-------------------------------------------------
     public function getContentAttribute($value): string
+    {
+        return ucfirst($value);
+    }
+    //-------------------------------------------------
+    public function getTitleAttribute($value): string
     {
         return ucfirst($value);
     }
@@ -181,10 +183,7 @@ class Blog extends Model
         if (!isset($filter['sort'])) {
             return $query->orderBy('id', 'asc');
         }
-
         $sort = $filter['sort'];
-
-
         $direction = Str::contains($sort, ':');
 
         if (!$direction) {
@@ -364,13 +363,6 @@ class Blog extends Model
             $list->trashedFilter($request->filter);
             $list->searchFilter($request->filter);
         }
-        foreach ($list->get() as $item) {
-            if ($item->created_by !== Auth::id()) {
-                $response['success'] = false;
-                $response['errors'][] = trans("vaahcms::messages.permission_denied");
-                return $response;
-            }
-        }
         switch ($type) {
             case 'trash':
                 if (isset($items_id) && count($items_id) > 0) {
@@ -388,12 +380,26 @@ class Blog extends Model
                 }
                 break;
             case 'trash-all':
+                foreach ($list->get() as $item) {
+                    if ($item->created_by !== Auth::id()) {
+                        $response['success'] = false;
+                        $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                        return $response;
+                    }
+                }
                 $list->delete();
                 break;
             case 'restore-all':
                 $list->restore();
                 break;
             case 'delete-all':
+                foreach ($list->get() as $item) {
+                    if ($item->created_by !== Auth::id()) {
+                        $response['success'] = false;
+                        $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                        return $response;
+                    }
+                }
                 $list->forceDelete();
                 break;
             case 'create-100-records':
@@ -413,7 +419,6 @@ class Blog extends Model
                 if (count($matches) !== 2) {
                     break;
                 }
-
                 self::seedSampleItems($matches[1]);
                 break;
         }
