@@ -54,11 +54,11 @@ const useVaah = vaah();
             </Column>
             <Column field="content" header="Content">
                 <template #body="{data}">
-                    <Button class="p-button-tiny p-button-text"
+                    <Button class="p-button-tiny p-button-text p-button-success"
                             data-testid="blogs-table-to-content-view"
                             v-tooltip.top="'Content'"
                             @click="store.toContent(data)"
-                            icon="pi pi-eye"/>
+                            icon="fa-regular fa-eye"/>
                 </template>
             </Column>
 
