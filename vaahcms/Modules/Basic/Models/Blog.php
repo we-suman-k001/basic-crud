@@ -179,7 +179,7 @@ class Blog extends Model
     {
 
         if (!isset($filter['sort'])) {
-            return $query->orderBy('id', 'desc');
+            return $query->orderBy('id', 'asc');
         }
 
         $sort = $filter['sort'];
