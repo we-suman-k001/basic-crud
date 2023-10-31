@@ -17,21 +17,15 @@ class BlogsController extends Controller {
     {
 
         try{
-
             $data = [];
-
             $data['permission'] = [];
             $data['rows'] = config('vaahcms.per_page');
-
             $data['fillable']['columns'] = Blog::getFillableColumns();
             $data['fillable']['except'] = Blog::getUnFillableColumns();
             $data['empty_item'] = Blog::getEmptyItem();
-
             $data['actions'] = [];
-
             $response['success'] = true;
             $response['data'] = $data;
-
         }catch (\Exception $e){
             $response = [];
             $response['success'] = false;
