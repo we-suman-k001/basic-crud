@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use DateTimeInterface;
 use Faker\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,10 @@ use WebReinvent\VaahCms\Libraries\VaahSeeder;
 use WebReinvent\VaahCms\Traits\CrudWithUuidObservantTrait;
 use function Laravel\Prompts\search;
 
+/**
+ * @method static where(string $string, mixed $title)
+ * @property mixed|string slug
+ */
 class Blog extends Model
 {
 
@@ -43,18 +48,19 @@ class Blog extends Model
 
     ];
     //-------------------------------------------------
+
     protected $appends = [
     ];
 
     //-------------------------------------------------
-    protected function serializeDate(DateTimeInterface $date)
+    protected function serializeDate(DateTimeInterface $date): string
     {
         $date_time_format = config('settings.global.datetime_format');
         return $date->format($date_time_format);
     }
 
     //-------------------------------------------------
-    public static function getUnFillableColumns()
+    public static function getUnFillableColumns(): array
     {
         return [
             'uuid',
@@ -65,20 +71,18 @@ class Blog extends Model
     }
 
     //-------------------------------------------------
-    public static function getFillableColumns()
+    public static function getFillableColumns(): array
     {
         $model = new self();
         $except = $model->fill_except;
         $fillable_columns = $model->getFillable();
-        $fillable_columns = array_diff(
+        return array_diff(
             $fillable_columns, $except
         );
-        return $fillable_columns;
     }
-
     //-------------------------------------------------
 
-    public function createdByUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'created_by', 'id'
@@ -90,9 +94,8 @@ class Blog extends Model
     {
         return ucfirst($value);
     }
-
     //-------------------------------------------------
-    public static function getEmptyItem()
+    public static function getEmptyItem(): array
     {
         $model = new self();
         $fillable = $model->getFillable();
@@ -100,12 +103,11 @@ class Blog extends Model
         foreach ($fillable as $column) {
             $empty_item[$column] = null;
         }
-
         return $empty_item;
     }
 
     //-------------------------------------------------
-    public function updatedByUser()
+    public function updatedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'updated_by', 'id'
@@ -113,7 +115,7 @@ class Blog extends Model
     }
 
     //-------------------------------------------------
-    public function deletedByUser()
+    public function deletedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class,
             'deleted_by', 'id'
@@ -121,7 +123,7 @@ class Blog extends Model
     }
 
     //-------------------------------------------------
-    public function getTableColumns()
+    public function getTableColumns(): array
     {
         return $this->getConnection()
             ->getSchemaBuilder()
@@ -154,33 +156,27 @@ class Blog extends Model
     }
 
     //-------------------------------------------------
-    public static function createItem($request)
+    public static function createItem($request): array
     {
-
         $inputs = $request->all();
-
         $validation = self::validation($inputs);
         if (!$validation['success']) {
             return $validation;
         }
         // check if title exist
         $item = self::where('title', $inputs['title'])->withTrashed()->first();
-
         if ($item) {
             $response['success'] = false;
             $response['messages'][] = "This title is already exist.";
             return $response;
         }
-
         // check if slug exist
         $item = self::where('slug', $inputs['slug'])->withTrashed()->first();
-
         if ($item) {
             $response['success'] = false;
             $response['messages'][] = "This slug is already exist.";
             return $response;
         }
-
         $item = new self();
         $item->fill($inputs);
         $item->slug = Str::slug($inputs['slug']);
