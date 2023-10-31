@@ -13,7 +13,7 @@ class BlogsController extends Controller {
 
     }
     //----------------------------------------------------------
-    public function getAssets(Request $request): array
+    public function getAssets(): array
     {
 
         try{
@@ -46,7 +46,7 @@ class BlogsController extends Controller {
         return $response;
     }
     //----------------------------------------------------------
-    public function getList(Request $request)
+    public function getList(Request $request): array
     {
         try{
             return Blog::getList($request);
@@ -150,7 +150,7 @@ class BlogsController extends Controller {
         }
     }
     //----------------------------------------------------------
-    public function getItem(Request $request, $id): array
+    public function getItem($id): array
     {
         try{
             return Blog::getItem($id);
@@ -184,10 +184,10 @@ class BlogsController extends Controller {
         }
     }
     //----------------------------------------------------------
-    public function deleteItem(Request $request,$id): array
+    public function deleteItem($id): array
     {
         try{
-            return Blog::deleteItem($request,$id);
+            return Blog::deleteItem($id);
         }catch (\Exception $e){
             $response = [];
             $response['success'] = false;
@@ -201,10 +201,10 @@ class BlogsController extends Controller {
         }
     }
     //----------------------------------------------------------
-    public function itemAction(Request $request,$id,$action): array
+    public function itemAction($id, $action): array
     {
         try{
-            return Blog::itemAction($request,$id,$action);
+            return Blog::itemAction($id, $action);
         }catch (\Exception $e){
             $response = [];
             $response['success'] = false;
