@@ -537,6 +537,7 @@ class Blog extends Model
         $rules = array(
             'title' => 'required|max:150',
             'slug' => 'required|max:150',
+            'content' => 'required|max:10000'
         );
 
         $validator = \Validator::make($inputs, $rules);
