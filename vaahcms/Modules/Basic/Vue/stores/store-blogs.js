@@ -288,7 +288,7 @@ export const useBlogsStore = defineStore({
             );
         },
         //---------------------------------------------------------------------
-        async updateListAfter(data, res) {
+        async updateListAfter(data) {
             if(data)
             {
                 this.action = vaah().clone(this.empty_action);
@@ -318,9 +318,7 @@ export const useBlogsStore = defineStore({
                     method = 'DELETE';
                     break;
             }
-
             this.action.filter = this.query.filter;
-
             let options = {
                 params: this.action,
                 method: method,

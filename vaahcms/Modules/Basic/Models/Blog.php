@@ -47,9 +47,6 @@ class Blog extends Model
 
     ];
     //-------------------------------------------------
-    protected $appends = [
-    ];
-    //-------------------------------------------------
     protected function serializeDate(DateTimeInterface $date): string
     {
         $date_time_format = config('settings.global.datetime_format');
@@ -57,6 +54,11 @@ class Blog extends Model
     }
     //-------------------------------------------------
     public function getContentAttribute($value): string
+    {
+        return ucfirst($value);
+    }
+    //-------------------------------------------------
+    public function getTitleAttribute($value): string
     {
         return ucfirst($value);
     }
@@ -179,12 +181,9 @@ class Blog extends Model
     {
 
         if (!isset($filter['sort'])) {
-            return $query->orderBy('id', 'desc');
+            return $query->orderBy('id', 'asc');
         }
-
         $sort = $filter['sort'];
-
-
         $direction = Str::contains($sort, ':');
 
         if (!$direction) {
@@ -254,12 +253,9 @@ class Blog extends Model
         $rules = array(
             'type' => 'required',
         );
-
         $messages = array(
             'type.required' => 'Action type is required',
         );
-
-
         $validator = \Validator::make($inputs, $rules, $messages);
         if ($validator->fails()) {
 
@@ -268,7 +264,6 @@ class Blog extends Model
             $response['errors'] = $errors;
             return $response;
         }
-
         if (isset($inputs['items'])) {
             $items_id = collect($inputs['items'])
                 ->pluck('id')
@@ -284,7 +279,6 @@ class Blog extends Model
                 return $response;
             }
         }
-
         switch ($inputs['type']) {
             case 'trash':
                 self::whereIn('id', $items_id)->delete();
@@ -293,18 +287,15 @@ class Blog extends Model
                 self::whereIn('id', $items_id)->restore();
                 break;
         }
-
         $response['success'] = true;
         $response['data'] = $items;
         $response['messages'][] = 'Action was successful.';
-
         return $response;
     }
     //-------------------------------------------------
     public static function deleteList($request): array
     {
         $inputs = $request->all();
-
         $rules = array(
             'type' => 'required',
             'items' => 'required',
@@ -372,13 +363,6 @@ class Blog extends Model
             $list->trashedFilter($request->filter);
             $list->searchFilter($request->filter);
         }
-        foreach ($list->get() as $item) {
-            if ($item->created_by !== Auth::id()) {
-                $response['success'] = false;
-                $response['errors'][] = trans("vaahcms::messages.permission_denied");
-                return $response;
-            }
-        }
         switch ($type) {
             case 'trash':
                 if (isset($items_id) && count($items_id) > 0) {
@@ -396,12 +380,26 @@ class Blog extends Model
                 }
                 break;
             case 'trash-all':
+                foreach ($list->get() as $item) {
+                    if ($item->created_by !== Auth::id()) {
+                        $response['success'] = false;
+                        $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                        return $response;
+                    }
+                }
                 $list->delete();
                 break;
             case 'restore-all':
                 $list->restore();
                 break;
             case 'delete-all':
+                foreach ($list->get() as $item) {
+                    if ($item->created_by !== Auth::id()) {
+                        $response['success'] = false;
+                        $response['errors'][] = trans("vaahcms::messages.permission_denied");
+                        return $response;
+                    }
+                }
                 $list->forceDelete();
                 break;
             case 'create-100-records':
@@ -421,7 +419,6 @@ class Blog extends Model
                 if (count($matches) !== 2) {
                     break;
                 }
-
                 self::seedSampleItems($matches[1]);
                 break;
         }
@@ -499,7 +496,7 @@ class Blog extends Model
 
     }
     //-------------------------------------------------
-    public static function deleteItem($request, $id): array
+    public static function deleteItem($id): array
     {
         $item = self::where('id', $id)->withTrashed()->first();
         if (!$item) {
@@ -516,7 +513,7 @@ class Blog extends Model
         return $response;
     }
     //-------------------------------------------------
-    public static function itemAction($request, $id, $type): array
+    public static function itemAction($id, $type): array
     {
         switch ($type) {
             case 'trash':
@@ -585,16 +582,9 @@ class Blog extends Model
         $inputs = $fillable['data']['fill'];
 
         $faker = Factory::create();
-
-        /*
-         * You can override the filled variables below this line.
-         * You should also return relationship from here
-         */
-
         if (!$is_response_return) {
             return $inputs;
         }
-
         $response['success'] = true;
         $response['data']['fill'] = $inputs;
         return $response;
@@ -603,5 +593,4 @@ class Blog extends Model
     //-------------------------------------------------
     //-------------------------------------------------
     //-------------------------------------------------
-
 }
