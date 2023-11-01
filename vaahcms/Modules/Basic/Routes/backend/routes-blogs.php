@@ -24,6 +24,7 @@ Route::group(
             ->name('vh.backend.basic.blogs.fill');
         Route::post('/', [BlogsController::class,'createItem'])
             ->name('vh.backend.basic.blogs.create');
+        Route::get( '/seed',[BlogsController::class,'seeder']);
         Route::get('/{id}', [BlogsController::class,'getItem'])
             ->name('vh.backend.basic.blogs.read');
         Route::match(['put', 'patch'], '/{id}', [BlogsController::class,'updateItem'])
