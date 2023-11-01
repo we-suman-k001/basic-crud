@@ -17,14 +17,16 @@ class SampleDataTableSeeder extends Seeder
      */
     #[NoReturn] public function run()
     {
-//        $request = new Request([
-//            'model_namespace' => Blog::class
-//        ]);
-//        $fillable = VaahSeeder::fill($request);
-//        $inputs = $fillable['data']['fill'];
-        $i = 0;
-        $records = 15;
-        while ($i < $records) {
+    $this->seed(1);
+    }
+
+    /**
+     * @param $record_count
+     * @param int $i=0
+     */
+
+    public function seed($record_count, int $i=0){
+        while ($i < $record_count) {
             $inputs = Blog::fillItem(false);
             $item = new Blog();
             $item->fill($inputs);
