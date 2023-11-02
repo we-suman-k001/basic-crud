@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 class BlogSeederTableSeeder extends Seeder
 {
 
-    public function run()
+    public function run(): array
     {
         $faker = Faker::create();
         $data = [];
