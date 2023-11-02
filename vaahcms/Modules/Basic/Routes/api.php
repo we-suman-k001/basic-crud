@@ -9,15 +9,15 @@ use Illuminate\Http\Request;
 |
 */
 
-/*
-Route::group(
-    [
-        'prefix'     => 'basic',
-    ],
-    function () {
-        //------------------------------------------------
-        Route::get( '/assets', 'BackendController@getAssets' )
-            ->name( 'vh.api.basic.assets' );
-        //------------------------------------------------
-    });
-*/
+///*
+//Route::group(
+//    [
+//        'prefix'     => 'basic',
+//    ],
+//    function () {
+//        //------------------------------------------------
+//        Route::get( '/assets', 'BackendController@getAssets' )
+//            ->name( 'vh.api.basic.assets' );
+//        //------------------------------------------------
+//    });
+//*/

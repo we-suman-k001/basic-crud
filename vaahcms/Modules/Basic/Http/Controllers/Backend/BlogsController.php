@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use VaahCms\Modules\Basic\Database\Seeders\BlogSeederTableSeeder;
 use VaahCms\Modules\Basic\Models\Blog;
 
 class BlogsController extends Controller {
@@ -11,6 +12,11 @@ class BlogsController extends Controller {
     public function __construct()
     {
 
+    }
+    public function seeder(){
+        $seeder = new BlogSeederTableSeeder();
+        $data = $seeder->run();
+        return $data;
     }
     //----------------------------------------------------------
     public function getAssets(): array
